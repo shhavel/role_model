@@ -31,6 +31,23 @@ describe RoleModel do
     end
   end
 
+  [:roles_setter, :roles_setter=].each do |roles_setter_method|
+    describe ".#{roles_setter_method}" do
+      before(:each) do
+        model_class.instance_eval do
+          send(roles_setter_method, :permissions)
+          roles :police
+        end
+      end
+      subject { model_class.new }
+
+      it "should change the title of public methods" do
+        subject.permissions = [:police]
+        subject.roles_mask.should == 1
+      end
+    end
+  end
+
   describe ".roles" do
     subject { model_class.new }
     it "should define the valid roles" do

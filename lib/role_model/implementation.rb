@@ -5,6 +5,7 @@ module RoleModel
     def roles=(*roles)
       self.send("#{self.class.roles_attribute_name}=", self.class.mask_for(*roles))
     end
+    #alias_method self.class.roles_setter_title.to_s.concat('=').to_sym, :roles=
 
     # query assigned roles
     def roles

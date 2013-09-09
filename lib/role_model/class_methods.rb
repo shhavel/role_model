@@ -18,12 +18,26 @@ module RoleModel
       self.roles_attribute_name = name.to_sym
     end
 
+    # set the title of public methods using to work with model
+    def roles_setter(title)
+      self.roles_setter = title
+    end
+
+    # alternative method signature: set the title of public methods using to work with model
+    def roles_setter=(title)
+      self.roles_setter_title = title.to_sym
+    end
+
     def mask_for(*roles)
       sanitized_roles = roles.map { |role| Array(role) }.flatten.map(&:to_sym)
 
       (valid_roles & sanitized_roles).inject(0) { |sum, role| sum + 2**valid_roles.index(role) }
     end
-    
+
+    def roles_alias_method(title)
+      title.to_s.concat('=').to_sym
+    end
+
     protected
 
     # :call-seq:
@@ -40,7 +54,7 @@ module RoleModel
         self.define_dynamic_queries(self.valid_roles)
       end
     end
-    
+
     # Defines dynamic queries for :role
     #   #is_<:role>?
     #   #<:role>?

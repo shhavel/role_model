@@ -4,7 +4,7 @@ require 'role_model/roles'
 
 module RoleModel
 
-  INHERITABLE_CLASS_ATTRIBUTES = [:roles_attribute_name, :valid_roles]
+  INHERITABLE_CLASS_ATTRIBUTES = [:roles_attribute_name, :roles_setter_title, :valid_roles]
 
   include Implementation
 
@@ -15,6 +15,7 @@ module RoleModel
         attr_accessor(*::RoleModel::INHERITABLE_CLASS_ATTRIBUTES)
       end
       roles_attribute :roles_mask # set default bitmask attribute
+      roles_setter :roles # set default methods title
       self.valid_roles = []
     end
   end

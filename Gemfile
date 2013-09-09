@@ -5,4 +5,5 @@ group :development do
   gem 'rspec',         '~> 2'
   gem 'rdoc',          '>=2.4.2'
   gem 'autotest'
+  gem 'debugger'
 end
