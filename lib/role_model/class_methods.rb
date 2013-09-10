@@ -26,6 +26,17 @@ module RoleModel
     # alternative method signature: set the title of public methods using to work with model
     def roles_setter=(title)
       self.roles_setter_title = title.to_sym
+
+      # assign roles
+      self.send(:define_method, self.roles_setter_title.to_s.concat('=').to_sym) { |*roles|
+        self.send("#{self.class.roles_attribute_name}=", self.class.mask_for(*roles))
+      }
+
+      # query assigned roles
+      self.send(:define_method, self.roles_setter_title) {
+        Roles.new(self, self.class.valid_roles.reject { |r| ((self.send(self.class.roles_attribute_name) || 0) & 2**self.class.valid_roles.index(r)).zero? })
+      }
+
     end
 
     def mask_for(*roles)

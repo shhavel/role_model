@@ -1,17 +1,5 @@
 module RoleModel
   module Implementation
-
-    # assign roles
-    def roles=(*roles)
-      self.send("#{self.class.roles_attribute_name}=", self.class.mask_for(*roles))
-    end
-    #alias_method self.class.roles_setter_title.to_s.concat('=').to_sym, :roles=
-
-    # query assigned roles
-    def roles
-      Roles.new(self, self.class.valid_roles.reject { |r| ((self.send(self.class.roles_attribute_name) || 0) & 2**self.class.valid_roles.index(r)).zero? })
-    end
-
     # query assigned roles returning an Array for the
     # declarative_authorization gem
     def role_symbols
