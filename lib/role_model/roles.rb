@@ -11,13 +11,13 @@ module RoleModel
 
     def add(role)
       roles = super
-      model_instance.roles = roles if model_instance
+      model_instance.send("#{model_instance.class.roles_setter_title}=", roles) if model_instance
       self
     end
     alias_method :<<, :add
 
     def delete(role)
-      model_instance.roles = super(role.to_sym)
+      model_instance.send("#{model_instance.class.roles_setter_title}=", super(role.to_sym))
       self
     end
 

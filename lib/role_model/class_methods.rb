@@ -36,7 +36,6 @@ module RoleModel
       self.send(:define_method, self.roles_setter_title) {
         Roles.new(self, self.class.valid_roles.reject { |r| ((self.send(self.class.roles_attribute_name) || 0) & 2**self.class.valid_roles.index(r)).zero? })
       }
-
     end
 
     def mask_for(*roles)
