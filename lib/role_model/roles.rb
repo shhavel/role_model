@@ -2,24 +2,24 @@ require 'set'
 
 module RoleModel
   class Roles < ::Set # :nodoc:
-    attr_reader :model_instance
+    attr_reader :setter_method
 
-    def initialize(sender, roles)
+    def initialize(roles, setter_method)
       super(roles)
-      @model_instance = sender
+      @setter_method = setter_method
     end
 
     def add(role)
       roles = super
-      model_instance.send("#{model_instance.class.roles_setter_title}=", roles) if model_instance
+      setter_method.call(roles) if setter_method
       self
     end
     alias_method :<<, :add
 
     def delete(role)
-      model_instance.send("#{model_instance.class.roles_setter_title}=", super(role.to_sym))
+      roles = super
+      setter_method.call(roles) if setter_method
       self
     end
-
   end
 end

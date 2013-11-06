@@ -9,43 +9,19 @@ module RoleModel
     end
 
     # set the bitmask attribute role assignments will be stored in
-    def roles_attribute(name)
-      self.roles_attribute = name
-    end
+    def roles_attribute(name, options={})
+      attribute_setter = options[:setter] || name
+      roles_set        = options[:roles]  || []
+      callbacks        = Array.wrap(options[:callbacks]).compact
 
-    # alternative method signature: set the bitmask attribute role assignments will be stored in
-    def roles_attribute=(name)
-      self.roles_attribute_name = name.to_sym
-    end
+      unless callbacks.empty?
+        callbacks.each do |callback|
+          self.send(callback, attribute_setter, name)
+        end
+      end
 
-    # set the title of public methods using to work with model
-    def roles_setter(title)
-      self.roles_setter = title
-    end
-
-    # alternative method signature: set the title of public methods using to work with model
-    def roles_setter=(title)
-      self.roles_setter_title = title.to_sym
-
-      # assign roles
-      self.send(:define_method, self.roles_setter_title.to_s.concat('=').to_sym) { |*roles|
-        self.send("#{self.class.roles_attribute_name}=", self.class.mask_for(*roles))
-      }
-
-      # query assigned roles
-      self.send(:define_method, self.roles_setter_title) {
-        Roles.new(self, self.class.valid_roles.reject { |r| ((self.send(self.class.roles_attribute_name) || 0) & 2**self.class.valid_roles.index(r)).zero? })
-      }
-    end
-
-    def mask_for(*roles)
-      sanitized_roles = roles.map { |role| Array(role) }.flatten.map(&:to_sym)
-
-      (valid_roles & sanitized_roles).inject(0) { |sum, role| sum + 2**valid_roles.index(role) }
-    end
-
-    def roles_alias_method(title)
-      title.to_s.concat('=').to_sym
+      roles(roles_set, attribute_name: attribute_setter)
+      define_roles_methods(attribute_name: name, attribute_setter: attribute_setter)
     end
 
     protected
@@ -57,9 +33,22 @@ module RoleModel
     #   roles(['role_1', ..., 'role_n'])
     #
     # declare valid roles
-    def roles(*roles)
-      opts = roles.last.is_a?(Hash) ? roles.pop : {}
-      self.valid_roles = roles.flatten.map(&:to_sym)
+    def roles(roles, opts)
+      raise 'Attribute name must be set' unless
+        attribute_name = opts[:attribute_name]
+
+      if roles.is_a?(Hash)
+        roles_registry = roles.dup
+      elsif
+        roles_registry = roles.flatten.map(&:to_sym).
+          each_with_index.inject({}) do |memo, (role, index)|
+            memo[role] = index
+            memo
+          end
+      end
+
+      @roles_registry[attribute_name] = roles_registry
+
       unless (opts[:dynamic] == false)
         self.define_dynamic_queries(self.valid_roles)
       end
@@ -79,6 +68,36 @@ module RoleModel
         end
       end
       include dynamic_module
+    end
+
+    private
+
+    def define_roles_methods(options)
+      raise 'Name of roles attribute must be set.' unless
+        attribute_name = options[:attribute_name]
+      raise 'Name of roles mask setter method must be set.' unless
+        attribute_setter = options[:attribute_setter]
+
+      class_eval <<-RUBY, __FILE__, __LINE__+1
+        # Returns RoleModel::Roles based on role_mask.
+        # To get raw array of roles, append to_a:
+        #
+        #   staff.roles.to_a #=> [:role_1, :role_n]
+        def #{attribute_setter}
+          roles_registry  = self.class.roles_registry[:#{attribute_setter}]
+          setter_method   = self.method('#{attribute_setter}=')
+          RoleModel::Util.role_mask_to_roles(#{attribute_name}, roles_registry, setter_method)
+        end
+
+        # Applies {Array} or {RoleModel::Roles} set of roles to role_mask.
+        def #{attribute_setter}=(*roles)
+          roles_registry  = self.class.roles_registry[:#{attribute_setter}]
+          roles           = RoleModel::Util.normalize_roles(roles)
+          sanitized_roles = RoleModel::Util.sanitize_roles(roles, roles_registry)
+          bitmask         = RoleModel::Util.build_roles_mask(sanitized_roles, roles_registry)
+          self.#{attribute_name} = bitmask
+        end
+      RUBY
     end
   end
 end
