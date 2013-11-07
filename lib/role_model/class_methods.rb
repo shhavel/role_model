@@ -86,16 +86,13 @@ module RoleModel
         def #{attribute_setter}
           roles_registry  = self.class.roles_registry[:#{attribute_setter}]
           setter_method   = self.method('#{attribute_setter}=')
-          RoleModel::Util.role_mask_to_roles(#{attribute_name}, roles_registry, setter_method)
+          RoleModel::Roles.new(#{attribute_name}, roles_registry, setter_method)
         end
 
         # Applies {Array} or {RoleModel::Roles} set of roles to role_mask.
         def #{attribute_setter}=(*roles)
           roles_registry  = self.class.roles_registry[:#{attribute_setter}]
-          roles           = RoleModel::Util.normalize_roles(roles)
-          sanitized_roles = RoleModel::Util.sanitize_roles(roles, roles_registry)
-          bitmask         = RoleModel::Util.build_roles_mask(sanitized_roles, roles_registry)
-          self.#{attribute_name} = bitmask
+          self.#{attribute_name} = RoleModel::Roles.new(roles, roles_registry).bitmask
         end
       RUBY
     end
