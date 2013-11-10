@@ -6,15 +6,16 @@ module RoleModel
 
     def initialize(roles_or_bitmask, valid_roles, setter_method=nil)
       @valid_roles   = valid_roles
-      @setter_method = setter_method
 
       if roles_or_bitmask.is_a?(Integer)
-        super(bitmask_to_roles(roles_or_bitmask))
+        roles_set = bitmask_to_roles(roles_or_bitmask)
       else
         normalized = normalize_roles(roles_or_bitmask)
-        sanitized  = sanitize_roles(normalized)
-        super(sanitized)
+        roles_set  = sanitize_roles(normalized)
       end
+      super(roles_set)
+      # otherwise super will call :add, and :add will call @setter_method
+      @setter_method = setter_method
     end
 
     def add(role)
