@@ -5,13 +5,13 @@ module RoleModel
     attr_reader :setter_method, :valid_roles
 
     def initialize(roles_or_bitmask, valid_roles, setter_method=nil)
-      @valid_roles   = valid_roles
+      @valid_roles       = valid_roles
+      @valid_roles_array = valid_roles.keys.map(&:to_sym)
 
       if roles_or_bitmask.is_a?(Integer)
         roles_set = bitmask_to_roles(roles_or_bitmask)
       else
-        normalized = normalize_roles(roles_or_bitmask)
-        roles_set  = sanitize_roles(normalized)
+        roles_set  = roles_or_bitmask
       end
       super(roles_set)
       # otherwise super will call :add, and :add will call @setter_method
@@ -19,7 +19,7 @@ module RoleModel
     end
 
     def add(role)
-      roles = super
+      roles = super if valid_role?(role)
       setter_method.call(roles) if setter_method
       self
     end
@@ -48,8 +48,8 @@ module RoleModel
       r.first.is_a?(RoleModel::Roles) ? r.first.to_a : r
     end
 
-    def sanitize_roles(roles)
-      roles.to_a.map { |role| Array(role) }.flatten.map(&:to_sym) & valid_roles.keys.map(&:to_sym)
+    def valid_role?(role)
+      @valid_roles_array.include?(role.to_sym)
     end
   end
 end
