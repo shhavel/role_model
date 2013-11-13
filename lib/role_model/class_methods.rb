@@ -12,7 +12,7 @@ module RoleModel
     def roles_attribute(name, options={})
       attribute_setter = options[:setter] || name
       roles_set        = options[:roles]  || []
-      callbacks        = Array.wrap(options[:callbacks]).compact
+      callbacks        = [options[:callbacks]].flatten.compact
 
       unless callbacks.empty?
         callbacks.each do |callback|
@@ -48,26 +48,6 @@ module RoleModel
       end
 
       @roles_registry[attribute_name] = roles_registry
-
-      unless (opts[:dynamic] == false)
-        self.define_dynamic_queries(self.valid_roles)
-      end
-    end
-
-    # Defines dynamic queries for :role
-    #   #is_<:role>?
-    #   #<:role>?
-    #
-    # Defines new methods which call #is?(:role)
-    def define_dynamic_queries(roles)
-      dynamic_module = Module.new do
-        roles.each do |role|
-          ["#{role}?".to_sym, "is_#{role}?".to_sym].each do |method|
-            define_method(method) { is? role }
-          end
-        end
-      end
-      include dynamic_module
     end
 
     private
