@@ -70,7 +70,7 @@ module RoleModel
         end
 
         # Applies {Array} or {RoleModel::Roles} set of roles to role_mask.
-        def #{attribute_setter}=(*roles)
+        def #{attribute_setter}=(roles)
           roles_registry  = self.class.roles_registry[:#{attribute_setter}]
           self.#{attribute_name} = RoleModel::Roles.new(roles, roles_registry).bitmask
         end
