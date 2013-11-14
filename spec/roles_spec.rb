@@ -5,9 +5,9 @@ describe RoleModel::Roles do
   let(:valid_roles) do
     {
       foo: 0,
-      bar: 1,
+      'bar' => 1,
       baz: 2,
-      quux: 3
+      'quux' => 3
     }
   end
   let(:array)           { [:foo, :bar] }
@@ -18,7 +18,7 @@ describe RoleModel::Roles do
 
   describe '#initialize' do
     context 'with bitmask' do
-      let(:bitmask) { 2**valid_roles[:foo] + 2**valid_roles[:bar] }
+      let(:bitmask) { 2**valid_roles[:foo] + 2**valid_roles['bar'] }
       subject { RoleModel::Roles.new(bitmask, valid_roles) }
 
       it { should include(:foo, :bar) }
@@ -31,7 +31,7 @@ describe RoleModel::Roles do
     end
 
     context 'with other Roles model' do
-      let(:other_model) { RoleModel::Roles.new([:foo, :bar], valid_roles) }
+      let(:other_model) { RoleModel::Roles.new([:foo, 'bar'], valid_roles) }
       subject { RoleModel::Roles.new(other_model, valid_roles) }
 
       it { should include(:foo, :bar) }
@@ -60,7 +60,7 @@ describe RoleModel::Roles do
 
   describe '#bitmask' do
     it 'should return a bitmask based on :valid_roles' do
-      bitmask = 2**valid_roles[:foo] + 2**valid_roles[:bar]
+      bitmask = 2**valid_roles[:foo] + 2**valid_roles['bar']
       subject.bitmask.should eq(bitmask)
     end
   end

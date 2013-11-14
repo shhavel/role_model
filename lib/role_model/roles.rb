@@ -5,8 +5,8 @@ module RoleModel
     attr_reader :setter_method, :valid_roles
 
     def initialize(roles_or_bitmask, valid_roles, setter_method=nil)
-      @valid_roles       = valid_roles
-      @valid_roles_array = valid_roles.keys.map(&:to_sym)
+      @valid_roles       = normalize_valid_roles(valid_roles)
+      @valid_roles_array = @valid_roles.keys
 
       if roles_or_bitmask.is_a?(Integer)
         roles_set = bitmask_to_roles(roles_or_bitmask)
@@ -19,6 +19,7 @@ module RoleModel
     end
 
     def add(role)
+      role  = role.to_sym
       roles = super if valid_role?(role)
       setter_method.call(roles) if setter_method
       self
@@ -26,7 +27,8 @@ module RoleModel
     alias_method :<<, :add
 
     def delete(role)
-      roles = super
+      role  = role.to_sym
+      roles = super(role)
       setter_method.call(roles) if setter_method
       self
     end
@@ -43,13 +45,15 @@ module RoleModel
       end.keys
     end
 
-    def normalize_roles(roles)
-      r = (roles || []).flatten
-      r.first.is_a?(RoleModel::Roles) ? r.first.to_a : r
-    end
-
     def valid_role?(role)
       @valid_roles_array.include?(role.to_sym)
+    end
+
+    def normalize_valid_roles(roles_registry)
+      roles_registry.inject({}) do |memo, (role,id)|
+        memo[role.to_sym] = id
+        memo
+      end
     end
   end
 end
