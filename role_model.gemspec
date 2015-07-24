@@ -50,20 +50,17 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<rspec>, ["~> 2"])
       s.add_development_dependency(%q<rdoc>, [">= 2.4.2"])
       s.add_development_dependency(%q<autotest>, [">= 0"])
-      s.add_development_dependency(%q<rspec>, ["~> 2"])
     else
       s.add_dependency(%q<jeweler>, [">= 1.5.2"])
       s.add_dependency(%q<rspec>, ["~> 2"])
       s.add_dependency(%q<rdoc>, [">= 2.4.2"])
       s.add_dependency(%q<autotest>, [">= 0"])
-      s.add_dependency(%q<rspec>, ["~> 2"])
     end
   else
     s.add_dependency(%q<jeweler>, [">= 1.5.2"])
     s.add_dependency(%q<rspec>, ["~> 2"])
     s.add_dependency(%q<rdoc>, [">= 2.4.2"])
     s.add_dependency(%q<autotest>, [">= 0"])
-    s.add_dependency(%q<rspec>, ["~> 2"])
   end
 end
 
